@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin · Online Book Store</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <header id="site-header" class="site-header"><div class="container site-header__inner"></div></header>
+
+  <main class="container" style="padding-bottom:64px">
+    <div class="page-head">
+      <h1 class="display">Store admin</h1>
+      <p>Manage the catalogue and move orders through delivery.</p>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-books" aria-controls="panel-books" aria-selected="true">Books</button>
+      <button type="button" role="tab" id="tab-orders" aria-controls="panel-orders" aria-selected="false">Orders</button>
+    </div>
+
+    <section id="panel-books" role="tabpanel" aria-labelledby="tab-books">
+      <div class="toolbar">
+        <label class="visually-hidden" for="admin-q">Search books</label>
+        <input class="input" id="admin-q" type="search" placeholder="Search title, author or ISBN" autocomplete="off">
+        <span class="spacer"></span>
+        <span class="faint small num" id="book-count"></span>
+        <button class="btn btn--primary" type="button" id="add-book">Add book</button>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Title</th>
+              <th scope="col">Category</th>
+              <th scope="col">ISBN</th>
+              <th scope="col" class="r">Price</th>
+              <th scope="col" class="r">Stock</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="book-rows"></tbody>
+        </table>
+      </div>
+      <nav class="pager" id="admin-pager" aria-label="Pagination"></nav>
+    </section>
+
+    <section id="panel-orders" role="tabpanel" aria-labelledby="tab-orders" hidden>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Order</th>
+              <th scope="col">Customer</th>
+              <th scope="col">Placed</th>
+              <th scope="col" class="r">Items</th>
+              <th scope="col" class="r">Total</th>
+              <th scope="col">Payment</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody id="order-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add / edit book -->
+  <dialog id="book-form-dialog" aria-labelledby="book-form-title">
+    <form id="book-form" novalidate>
+      <div class="dialog__head">
+        <h2 class="h2" id="book-form-title">Add book</h2>
+      </div>
+      <button class="dialog__close" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <div class="dialog__body admin-preview">
+        <div id="cover-preview"></div>
+        <div class="form-grid">
+          <div class="span-6"><div class="form-alert" role="alert" tabindex="-1"></div></div>
+          <div class="field span-4">
+            <label for="f-title">Title</label>
+            <input class="input" id="f-title" name="title" required maxlength="200">
+            <span class="error" data-error-for="title"></span>
+          </div>
+          <div class="field span-2">
+            <label for="f-edition">Edition <span class="faint">(optional)</span></label>
+            <input class="input" id="f-edition" name="edition" maxlength="40" placeholder="3rd Edition">
+            <span class="error" data-error-for="edition"></span>
+          </div>
+          <div class="field span-6">
+            <label for="f-subtitle">Subtitle <span class="faint">(optional)</span></label>
+            <input class="input" id="f-subtitle" name="subtitle" maxlength="200">
+            <span class="error" data-error-for="subtitle"></span>
+          </div>
+          <div class="field span-4">
+            <label for="f-author">Author(s)</label>
+            <input class="input" id="f-author" name="author" required maxlength="200" placeholder="Separate multiple authors with commas">
+            <span class="error" data-error-for="author"></span>
+          </div>
+          <div class="field span-2">
+            <label for="f-year">Year <span class="faint">(optional)</span></label>
+            <input class="input" id="f-year" name="publishedYear" inputmode="numeric" maxlength="4">
+            <span class="error" data-error-for="publishedYear"></span>
+          </div>
+          <div class="field span-3">
+            <label for="f-isbn">ISBN</label>
+            <input class="input" id="f-isbn" name="isbn" required maxlength="17" placeholder="978-0-13-468599-1">
+            <span class="error" data-error-for="isbn"></span>
+          </div>
+          <div class="field span-3">
+            <label for="f-category">Category</label>
+            <select class="select" id="f-category" name="categoryId" required></select>
+            <span class="error" data-error-for="categoryId"></span>
+          </div>
+          <div class="field span-2">
+            <label for="f-price">Price (₹)</label>
+            <input class="input" id="f-price" name="price" inputmode="decimal" required>
+            <span class="error" data-error-for="price"></span>
+          </div>
+          <div class="field span-2">
+            <label for="f-list">List price (₹) <span class="faint">(optional)</span></label>
+            <input class="input" id="f-list" name="listPrice" inputmode="decimal">
+            <span class="error" data-error-for="listPrice"></span>
+          </div>
+          <div class="field span-2">
+            <label for="f-stock">Copies in stock</label>
+            <input class="input" id="f-stock" name="stock" inputmode="numeric" required>
+            <span class="error" data-error-for="stock"></span>
+          </div>
+          <div class="field span-6">
+            <label for="f-description">Description <span class="faint">(optional)</span></label>
+            <textarea class="textarea" id="f-description" name="description" maxlength="4000" rows="3"></textarea>
+            <span class="error" data-error-for="description"></span>
+          </div>
+          <div class="field span-3">
+            <label for="f-color">Cover colour</label>
+            <div class="color-field">
+              <input type="color" id="f-color-pick" aria-label="Pick cover colour">
+              <input class="input" id="f-color" name="coverColor" required maxlength="7">
+            </div>
+            <span class="error" data-error-for="coverColor"></span>
+          </div>
+        </div>
+      </div>
+      <div class="dialog__foot">
+        <button class="btn btn--ghost" type="button" data-close>Cancel</button>
+        <button class="btn btn--primary" type="submit" id="book-form-submit">Save book</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Delete confirmation -->
+  <dialog id="delete-dialog" class="dialog--sm" aria-labelledby="delete-title">
+    <div class="dialog__body">
+      <h2 class="h3" id="delete-title">Delete this book?</h2>
+      <p class="muted" id="delete-text" style="margin-top:8px"></p>
+    </div>
+    <div class="dialog__foot">
+      <button class="btn btn--ghost" type="button" data-close>Keep it</button>
+      <button class="btn btn--danger" type="button" id="confirm-delete">Delete book</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Online Book Store · Browse books</title>
+  <meta name="description" content="Programming, computer science, academic, fiction and self-help books, delivered across India.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <header id="site-header" class="site-header"><div class="container site-header__inner"></div></header>
+
+  <main>
+    <section class="container intro">
+      <div>
+        <h1 class="display">Find your next book</h1>
+        <p id="intro-count">Programming, computer science, academic texts, fiction and self help.</p>
+      </div>
+      <form class="search" id="search-form" role="search">
+        <label class="visually-hidden" for="q">Search by title, author or ISBN</label>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+          <input class="input" id="q" name="q" type="search" placeholder="Title, author or ISBN" autocomplete="off" maxlength="100">
+        </div>
+        <button class="btn btn--primary" type="submit">Search</button>
+      </form>
+    </section>
+
+    <div class="container catalog">
+      <aside class="filters" aria-label="Filters">
+        <fieldset id="category-filter">
+          <legend class="eyebrow">Category</legend>
+          <div id="category-options"></div>
+        </fieldset>
+        <fieldset>
+          <legend class="eyebrow">Price</legend>
+          <label class="check"><input type="radio" name="price" value="" checked> Any price</label>
+          <label class="check"><input type="radio" name="price" value="-500"> Under ₹500</label>
+          <label class="check"><input type="radio" name="price" value="500-1000"> ₹500 – ₹1,000</label>
+          <label class="check"><input type="radio" name="price" value="1000-"> Over ₹1,000</label>
+        </fieldset>
+        <fieldset>
+          <legend class="eyebrow">Availability</legend>
+          <label class="check"><input type="checkbox" name="stock" value="1"> In stock only</label>
+        </fieldset>
+      </aside>
+
+      <section aria-labelledby="results-heading">
+        <div class="results-bar">
+          <p id="results-heading" aria-live="polite">Loading books…</p>
+          <label class="sort">
+            <span>Sort by</span>
+            <select class="select" id="sort" name="sort">
+              <option value="popular">Most popular</option>
+              <option value="rating">Highest rated</option>
+              <option value="price-low">Price: low to high</option>
+              <option value="price-high">Price: high to low</option>
+              <option value="newest">Newly added</option>
+            </select>
+          </label>
+        </div>
+        <div class="active-filters" id="active-filters"></div>
+        <div class="grid" id="grid"></div>
+        <nav class="pager" id="pager" aria-label="Pagination"></nav>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>Online Book Store</span>
+      <span>Free delivery on orders over ₹999 · Cash on delivery available</span>
+    </div>
+  </footer>
+
+  <dialog id="book-dialog" aria-labelledby="detail-title"></dialog>
+
+  <script type="module" src="/js/catalog.js"></script>
+</body>
+</html>
