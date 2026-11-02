@@ -1,0 +1,7 @@
+.git
+.idea
+out
+lib
+target
+*.iml
+.DS_Store

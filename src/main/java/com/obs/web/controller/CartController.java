@@ -3,6 +3,7 @@ package com.obs.web.controller;
 import com.obs.exception.ValidationException;
 import com.obs.service.CartService;
 import com.obs.service.DemoGateway;
+import com.obs.service.InvoiceService;
 import com.obs.service.OrderService;
 import com.obs.service.PaymentService;
 import com.obs.web.Access;
@@ -15,13 +16,16 @@ public final class CartController {
     private final CartService cart;
     private final OrderService orders;
     private final PaymentService payments;
+    private final InvoiceService invoices;
     /** Null unless the demo gateway is the active gateway. */
     private final DemoGateway demoGateway;
 
-    public CartController(CartService cart, OrderService orders, PaymentService payments, DemoGateway demoGateway) {
+    public CartController(CartService cart, OrderService orders, PaymentService payments, InvoiceService invoices,
+                          DemoGateway demoGateway) {
         this.cart = cart;
         this.orders = orders;
         this.payments = payments;
+        this.invoices = invoices;
         this.demoGateway = demoGateway;
     }
 
@@ -46,6 +50,9 @@ public final class CartController {
                 req.param("shippingName"),
                 req.param("shippingPhone"),
                 req.param("shippingAddress"))));
+        // Paid orders only; ?download=1 saves the PDF instead of opening it in the browser.
+        router.get("/api/orders/{id}/invoice", Access.USER, req ->
+                invoices.invoice(req.user(), req.pathInt("id"), "1".equals(req.param("download"))));
 
         router.get("/api/payments/config", Access.PUBLIC, req -> payments.config());
         router.post("/api/orders/{id}/payment", Access.USER, req -> payments.start(req.user(), req.pathInt("id")));

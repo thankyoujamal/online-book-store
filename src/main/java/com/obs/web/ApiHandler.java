@@ -57,6 +57,10 @@ public final class ApiHandler implements HttpHandler {
             }
             Request request = new Request(exchange, match.pathParams(), user, token);
             Object result = match.route().handler().handle(request);
+            if (result instanceof Download file) {
+                sendFile(exchange, file);
+                return;
+            }
             send(exchange, result instanceof Reply reply ? reply : Reply.ok(result));
         } catch (Router.MethodNotAllowed e) {
             send(exchange, error(405, method + " is not supported on " + path + ".", null));
@@ -103,6 +107,19 @@ public final class ApiHandler implements HttpHandler {
         exchange.sendResponseHeaders(reply.status(), bytes.length);
         try (OutputStream out = exchange.getResponseBody()) {
             out.write(bytes);
+        }
+    }
+
+    private static void sendFile(HttpExchange exchange, Download file) throws IOException {
+        var headers = exchange.getResponseHeaders();
+        headers.set("Cache-Control", "no-store");
+        headers.set("X-Content-Type-Options", "nosniff");
+        headers.set("Content-Type", file.contentType());
+        headers.set("Content-Disposition", (file.inline() ? "inline" : "attachment")
+                + "; filename=\"" + file.fileName().replaceAll("[^A-Za-z0-9._-]", "_") + "\"");
+        exchange.sendResponseHeaders(200, file.bytes().length);
+        try (OutputStream out = exchange.getResponseBody()) {
+            out.write(file.bytes());
         }
     }
 

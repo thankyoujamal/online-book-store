@@ -223,7 +223,9 @@ function orderRow(o) {
       <td class="num">${date(o.createdAt)}</td>
       <td class="r">${o.items.reduce((n, i) => n + i.quantity, 0)}</td>
       <td class="r">${money(o.total)}</td>
-      <td>${paymentBadge(o)}</td>
+      <td>${paymentBadge(o)}${o.paymentStatus === "PAID"
+        ? html`<div><a class="small" href="/api/orders/${o.id}/invoice" target="_blank" rel="noopener">Invoice</a></div>`
+        : ""}</td>
       <td>${next.length
         ? html`<label class="visually-hidden" for="status-${o.id}">Status of ${orderNo(o.id)}</label>
           <select class="select" id="status-${o.id}" data-status>

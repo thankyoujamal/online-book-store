@@ -953,6 +953,18 @@ dialog[open] { animation: dialog-in 220ms ease-out; }
 .order__item + .order__item { border-top: 1px solid var(--line); }
 .order__item .cover--thumb { width: 40px; }
 .order__ship { padding: 12px 24px 16px; font-size: 13px; color: var(--text-2); border-top: 1px solid var(--line); }
+.order__invoice {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 0 0 var(--r-md) var(--r-md);
+}
+.order__invoice > span { margin-right: auto; }
+.banner__link { margin-left: 6px; font-weight: 600; color: inherit; }
 
 .status {
   display: inline-flex;

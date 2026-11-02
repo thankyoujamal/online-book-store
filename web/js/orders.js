@@ -40,7 +40,17 @@ function orderCard(order) {
         ${Number(order.shipping) > 0 ? html` · Delivery ${money(order.shipping)}` : html` · Free delivery`}
         ${order.paymentRef ? html`<br>Payment reference <span class="ref">${order.paymentRef}</span>` : ""}
       </p>
+      ${order.paymentStatus === "PAID" ? invoiceLinks(order.id) : ""}
     </article>`;
+}
+
+function invoiceLinks(id) {
+  return html`
+    <div class="order__invoice">
+      <span class="small muted">Invoice for ${orderNo(id)}</span>
+      <a class="btn btn--ghost btn--sm" href="/api/orders/${id}/invoice" target="_blank" rel="noopener">View invoice</a>
+      <a class="btn btn--secondary btn--sm" href="/api/orders/${id}/invoice?download=1" download>Download PDF</a>
+    </div>`;
 }
 
 const awaitingPayment = (o) => o.paymentMethod === "ONLINE" && o.paymentStatus === "UNPAID" && o.status === "PLACED";
@@ -51,7 +61,8 @@ function banner(placed, payment) {
   const no = orderNo(placed);
   if (order.paymentStatus === "PAID" && order.paymentMethod === "ONLINE") {
     return html`<div class="banner" role="status"><strong>Payment received. Order ${no} is confirmed.</strong>
-      <span>We'll ship it soon. Status updates will appear here.</span></div>`;
+      <span>We'll ship it soon. Your invoice is ready:</span>
+      <a class="banner__link" href="/api/orders/${placed}/invoice?download=1" download>Download invoice (PDF)</a></div>`;
   }
   if (awaitingPayment(order)) {
     const text = payment === "failed"

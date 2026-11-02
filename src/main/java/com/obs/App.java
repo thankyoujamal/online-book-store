@@ -11,6 +11,7 @@ import com.obs.service.AuthService;
 import com.obs.service.BookService;
 import com.obs.service.CartService;
 import com.obs.service.DemoGateway;
+import com.obs.service.InvoiceService;
 import com.obs.service.OrderService;
 import com.obs.service.PaymentGateway;
 import com.obs.service.PaymentService;
@@ -39,7 +40,7 @@ public final class App {
         AppConfig config = AppConfig.load(Path.of("app.properties"));
 
         Database db = new Database(
-                config.get("db.url", "jdbc:mysql://localhost:3306/online_book_store?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"),
+                config.get("db.url", "jdbc:mysql://localhost:3306/online_book_store?useSSL=false&allowPublicKeyRetrieval=true&connectionTimeZone=%2B00:00&forceConnectionTimeZoneToSession=true"),
                 config.get("db.user", "root"),
                 config.get("db.password", ""));
         try {
@@ -92,6 +93,10 @@ public final class App {
         OrderService orderService = new OrderService(db, orderDao, cartDao, bookDao,
                 gateway == null ? null : gateway.name());
         PaymentService paymentService = new PaymentService(db, orderDao, gateway);
+        InvoiceService invoiceService = new InvoiceService(db, orderDao,
+                config.get("store.name", "Online Book Store"),
+                config.get("store.address", ""),
+                config.get("store.email", ""));
 
         String adminEmail = config.get("admin.email", "admin@bookstore.local");
         if (authService.ensureAdmin(config.get("admin.name", "Store Admin"), adminEmail,
@@ -103,7 +108,7 @@ public final class App {
         Router router = new Router();
         new AuthController(authService, sessions).register(router);
         new BookController(bookService).register(router);
-        new CartController(cartService, orderService, paymentService, demoGateway).register(router);
+        new CartController(cartService, orderService, paymentService, invoiceService, demoGateway).register(router);
         new AdminController(bookService, orderService).register(router);
 
         int port = config.getInt("server.port", 8080);

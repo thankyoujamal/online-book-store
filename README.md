@@ -10,6 +10,7 @@ A full-stack bookstore built with **Java, JDBC and MySQL** on the backend and pl
 - **Checkout.** One transaction locks the cart and book rows (`SELECT … FOR UPDATE`), reserves stock, writes the order and its items, then empties the cart. Two buyers can't both get the last copy.
 - **Order history.** Each order keeps a copy of the title, author and price paid, so history survives later edits or deletion of the book.
 - **Online payment.** Customers choose between paying online (UPI, card or netbanking) and cash on delivery. Payments go through a `PaymentGateway` interface with two implementations: a built-in **DemoPay** gateway (no account, no real money) and **Razorpay**. Both follow the same flow: the store creates a gateway order, the gateway signs each payment with HMAC-SHA256, and the server verifies that signature before marking the order paid, so the browser can't fake a payment. Unpaid online orders show a **Pay** button in My orders and can't be shipped. Cash-on-delivery orders become paid when they're marked delivered.
+- **Invoices.** Once an order is paid, customers can view its invoice or download it as a PDF from My orders; admins can open any paid order's invoice. Online orders get an invoice as soon as the payment is verified, cash-on-delivery orders once they are delivered. The PDF is generated with a small built-in writer (`util/Pdf.java`), so no PDF library is needed. Seller details come from `store.*` in `app.properties`.
 - **Admin.** Add, edit and delete books (ISBN-10/13 checksum, unique ISBN, price rules) with a live cover preview. Orders move from Placed to Shipped to Delivered, or Placed to Cancelled; cancelling puts the stock back.
 - **Validation and errors.** Every input is validated on the server, and the client mirrors those checks. Errors map to HTTP status codes (400, 401, 403, 404, 409, 503) and come back as JSON with per-field messages. Internal details are logged and never sent to the browser.
 
@@ -67,7 +68,7 @@ src/main/java/com/obs/
   service/                      Business rules and validation
   web/                          Router, request parsing, sessions, error mapping
   web/controller/               REST endpoints
-  util/                         Password hashing, validator, JSON writer
+  util/                         Password hashing, validator, JSON writer, PDF writer
 web/                            Frontend (HTML, CSS, ES modules)
 ```
 
@@ -81,6 +82,7 @@ web/                            Frontend (HTML, CSS, ES modules)
 | PUT, DELETE | `/api/cart/items/{bookId}` | customer |
 | GET, POST | `/api/orders` | customer |
 | POST | `/api/orders/{id}/payment`, `/api/orders/{id}/payment/verify` | customer |
+| GET | `/api/orders/{id}/invoice` (PDF; add `?download=1` to save it) | customer (own paid orders), admin |
 | GET | `/api/payments/config` | public |
 | POST | `/api/demo-gateway/charge` (only when `payment.gateway=demo`) | customer |
 | GET, POST | `/api/admin/books` | admin |
